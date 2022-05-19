@@ -1,0 +1,6 @@
+GET ----> Obtener informacion
+POST ----> Enviar informacion
+PUT ------> Actualizar
+DELETE -----> Eliminar
+
+Flask run --reload

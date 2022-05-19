@@ -1,0 +1,27 @@
+<!-- Extendemos el html que queremos modificar -->
+{% extends "layout.html" %}
+
+<!-- Podemos acceder a los bloques del layout -->
+<!-- Abro bloque -->
+{% block title %} 
+    {{titulo}}  
+{% endblock %}
+<!-- Cierro bloque -->
+
+<!-- Modificamos el body del layout -->
+
+{% block body %}
+    <h3 style="color: rgb(199, 23, 247); font-size: 40px">
+        Este es el body de el template Acerca de
+    </h3>
+
+<!-- ENRUTAMIENTO EN HTML -->
+<li>
+    <a href="http://www.google.com">Google</a>
+</li>
+<li>
+    <a href="/modifica?titulo=OtroTitulo">Navega hacia el template "modificador"</a>
+</li>
+
+{% endblock %}
+

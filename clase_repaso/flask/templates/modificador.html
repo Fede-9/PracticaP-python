@@ -1,0 +1,17 @@
+<!-- Extendemos el html que queremos modificar -->
+{% extends "layout.html" %}
+
+<!-- Podemos acceder a los bloques del layout -->
+<!-- Abro bloque -->
+{% block title %} 
+    {{titulo}}  
+{% endblock %}
+<!-- Cierro bloque -->
+
+<!-- Modificamos el body del layout -->
+
+{% block body %}
+    <h3 style="color: rgb(6, 18, 99); font-size: 40px">
+        Este es el body de el template modificador
+    </h3>
+{% endblock %}
