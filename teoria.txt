@@ -1,6 +1,19 @@
-GET ----> Obtener informacion
+GET ----> Obtener informacion (hacer una llamada)
 POST ----> Enviar informacion
 PUT ------> Actualizar
 DELETE -----> Eliminar
+flash -----> para los mensajes
+redirect -----> para redireccionar a una funcion
+render_template -------> para redireccionar a un template
+request -------> para hacer peticion
+url_for -------> es parte de uno de los parametros que recibe el redirect, forma parte del redirect
+
+
+
+
+
+
 
 Flask run --reload
+
+pip install -r requirements.txt
