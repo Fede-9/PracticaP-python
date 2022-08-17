@@ -6,7 +6,7 @@ from sqlalchemy import ForeignKey, true
 
 app=Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://BD2021:BD2021itec@143.198.156.171/sql_cometto'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://BD2021:BD2021itec@143.198.156.171/sql_palma'
 
 db = SQLAlchemy(app)
 

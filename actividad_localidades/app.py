@@ -25,7 +25,8 @@ class Provincia(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False, unique=True)
-
+    
+# para no pasar el id solo inicializamos el nombre
     def __init__(self, nombre):
         self.nombre = nombre
 
@@ -51,6 +52,7 @@ class Localidad(db.Model):
 
 
 # DEFINIMOS LA PRIMER RUTA PARA EL INDEX
+# En el primer parametro recibe la ruta y en el segundo el metodo
 
 @app.route('/', methods=['GET'])
 def index():
@@ -103,6 +105,7 @@ def editar_provincias(id):
 @app.route('/provincias/borrar/<id>', methods=['GET'])
 def borrar_provincias(id):
     provincia = db.session.query(Provincia).filter_by(id=id).first()
+
     try:
         db.session.delete(provincia)
         db.session.commit()

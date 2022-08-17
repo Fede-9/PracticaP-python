@@ -9,12 +9,14 @@ def index():
         'index.html',
     )
 
+
 @app.route("/info")
 def info():
-    
     return render_template(
         'info.html',
         )
+    
+
 
 #AGREGAR UNA RUTA PARA ACERCA DE, QUE RETORNE UN TEMPLATE PARA ACERCA DE:
 
