@@ -40,7 +40,7 @@ class Localidad(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False, unique=True)
-    idProvincia = db.Column(db.Integer, ForeignKey("provincia.id"))
+    provinciaID = db.Column(db.Integer, ForeignKey("provincia.id"))
     provincia = db.relationship("Provincia")
 
     def __init__(self, nombre, idProvincia):

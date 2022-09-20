@@ -9,11 +9,20 @@ request -------> para hacer peticion
 url_for -------> es parte de uno de los parametros que recibe el redirect, forma parte del redirect
 
 
+--- COMANDOS FLASK MIGRATE ----
+
+flask db init
+
+flask db migrate -m "Initial migration."
+
+flask db upgrade
 
 
 
-
-
+---- PARA CORRER FLASK -----
 Flask run --reload
 
+
+
+---- PARA LOS REQUERIMIENTOS ----
 pip install -r requirements.txt
