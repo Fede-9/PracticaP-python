@@ -1,11 +1,12 @@
-from flask import Flask, jsonify
+from crypt import methods
+from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from sqlalchemy import ForeignKey
 from marshmallow import fields
 
-from alexis import TipoDni
+
 
 
 # creamos la aplicacion
@@ -36,6 +37,9 @@ class Pais(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False, unique=True)
+
+    def __init__(self):
+        return self.nombre
 
 
 class Provincia(db.Model):
@@ -189,12 +193,30 @@ class TipoUsuarioSerializer(ma.Schema):
 
 
 # ------ RUTAS --------
+# sino determinamos el metodo es un get
 @app.route('/paises')
 def get_paises():
     pais = db.session.query(Pais).all()
     pais_schema = PaisSerializer().dump(pais, many=True)
     return jsonify(pais_schema)
 
+# aca usamos el post
+@app.route('/paises', methods=['POST'])
+def add_paises():
+    if request.method == 'POST':
+        data = request.json
+        nombre = data['nombre']
+        paises = db.session.query(Pais).all()
+        for pais in paises:
+            if nombre == pais.nombre:
+                return jsonify({'Mensaje':'Ya existe un pais con ese nombre'}),400
+            nuevo_pais = Pais(nombre)
+            db.session.add(nuevo_pais)
+            db.session.commit()
+        return jsonify(
+            {'ENVIE UN NOMBRE': nombre}
+        )
+    
 
 @app.route('/nombre_paises')
 def get_nombre_paises():
@@ -216,7 +238,12 @@ def provincia():
     provincia_schema = ProvinciaSerializer().dump(provincia, many=True)
     return jsonify(provincia_schema)
 
-
+@app.route('/provincias', methods=['POST'])
+def add_provincia():
+    if request.method == 'POST':
+        data = request.json
+        nombre = data['nombre']
+        
 @app.route('/localidades')
 def localidad():
     localidad = db.session.query(Localidad).all()
@@ -250,6 +277,7 @@ def tipoUsuario():
     tipousuario = db.session.query(Tipousuario).all()
     tipousuario_schema = TipoUsuarioSerializer().dump(tipousuario, many=True)
     return jsonify(tipousuario_schema)
+
 
 
 
