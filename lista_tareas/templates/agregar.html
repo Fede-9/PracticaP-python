@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Agregar
+{% endblock %}
+
+
+{%  block body %}
+
+    
+    <form action="{{ url_for('agregar') }}" method="POST">
+        <input type="text" name="tarea" placeholder="Ingrese la Tarea">
+        <button>Agregar Tarea</button>
+    </form>
+
+    <a href="{{ url_for('index') }}">Regresar al Home</a>
+
+{% endblock %}
