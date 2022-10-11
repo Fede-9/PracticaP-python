@@ -1,0 +1,14 @@
+('/countries')
+get_countries():
+
+('/countries', methods=['POST'])
+post_countries():
+
+('/countries_names')
+get_country_names():
+
+('/persons')
+get_persons():
+
+('/users')
+get_users():

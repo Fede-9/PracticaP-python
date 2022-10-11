@@ -1,4 +1,4 @@
-from crypt import methods
+
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -151,7 +151,7 @@ class PersonaSerializer(ma.Schema):
 
 
 class ProvinciaSerializer(ma.Schema):
-        id = fields.Integer(dump_only=True)
+        # id = fields.Integer(dump_only=True)
         nombre = fields.String()
         idPais = fields.Integer()
 
@@ -210,19 +210,23 @@ def add_paises():
         for pais in paises:
             if nombre == pais.nombre:
                 return jsonify({'Mensaje':'Ya existe un pais con ese nombre'}),400
-            nuevo_pais = Pais(nombre)
+            nuevo_pais = Pais(nombre = nombre)
             db.session.add(nuevo_pais)
             db.session.commit()
+            pais_schema = PaisSinIdSerializer().dump(nuevo_pais)
         return jsonify(
-            {'ENVIE UN NOMBRE': nombre}
-        )
+            {"Mensaje": "El pais se creo correctamente"},
+            {"Pais": pais_schema}
+        ), 201
     
 
 @app.route('/nombre_paises')
 def get_nombre_paises():
-    pais = db.session.query(Pais).all()
-    pais_schema = PaisSinIdSerializer().dump(pais, many=True)
+    pais_schema = PaisSinIdSerializer().dump(
+        db.session.query(Pais).all(), many=True
+    )
     return jsonify(pais_schema)
+    
 
 
 @app.route('/personas')
@@ -233,7 +237,7 @@ def persona():
 
 
 @app.route('/provincias')
-def provincia():
+def get_provincias():
     provincia = db.session.query(Provincia).all()
     provincia_schema = ProvinciaSerializer().dump(provincia, many=True)
     return jsonify(provincia_schema)
@@ -243,6 +247,24 @@ def add_provincia():
     if request.method == 'POST':
         data = request.json
         nombre = data['nombre']
+        idPais = data['idPais']
+        try:
+            nueva_provincia = Provincia(idPais=idPais, nombre=nombre)
+            db.session.add(nueva_provincia)
+            db.session.commit()
+
+            provincia_schema = ProvinciaSerializer().dump(nueva_provincia)
+
+            return jsonify(
+                {"Mensaje": "La provincia se creo correctamente"},
+                {"Pais": provincia_schema}
+            ), 201
+
+        except:
+            return jsonify(
+                {"Mensaje": "Algo salio mal, valide los datos"},
+            ), 404
+
         
 @app.route('/localidades')
 def localidad():
