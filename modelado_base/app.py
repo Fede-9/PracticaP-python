@@ -1,10 +1,19 @@
+from enum import unique
+import json
+import hashlib
+from datetime import datetime
+from logging import exception
 
+
+
+# import bcrypt
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from sqlalchemy import ForeignKey
 from marshmallow import fields
+
 
 
 
@@ -38,6 +47,11 @@ class Pais(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(50), nullable=False, unique=True)
 
+    """
+    SI NO SE ESTABLECE UN INIT CADA VEZ QUE SE GENERE EL OBJETO DEBERAN 
+    ESTABLECER QUE PARAMETRO ES CADA UNO, DE LO CONTRARIO EL PRIMER PARAMETRO
+    SERA CONSIDERADO COMO ID
+    """
     def __init__(self):
         return self.nombre
 
@@ -87,7 +101,7 @@ class Usuario(db.Model):
     __tablename__ = 'usuario'
 
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(50), nullable=False)
+    nombre = db.Column(db.String(50), nullable=False, unique=True)
     contrasenia = db.Column(db.String(50), nullable=False)
     idTipousuario = db.Column(db.Integer, ForeignKey("tipousuario.id"))
     fechaCarga = db.Column(db.String(50), nullable=False)
@@ -175,7 +189,8 @@ class TipoDniSerializer(ma.Schema):
 class UsuarioSerializer(ma.Schema):
     id = fields.Integer(dump_only=True)
     nombre = fields.String()
-    contrasenia = fields.String()
+    # nunca mostrar la contrasenia!!!
+    # contrasenia = fields.String()
     idTipousuario = fields.Integer()
     fechaCarga = fields.String()
     idPersona = fields.Integer()
@@ -231,9 +246,28 @@ def get_nombre_paises():
 
 @app.route('/personas')
 def persona():
-    persona = db.session.query(Persona).all()
+# ------------- PAGINADO ------------
+# El paginado recibe 2 parametros principales: PAGINA (pag) Y CANTIDAD (can)
+# Y un tercer parametro obligatorio que es el error_out que se puede setear como vacio
+
+    try:
+        can = int(request.args.get('can'))
+        pag = int(request.args.get('pag'))
+        persona = Persona.query.paginate(pag, can, error_out='No se obtienen valores').items
+    except:
+        persona = db.session.query(Persona).all()
+        pag = 1
+        can = 'Todos'
+
+
     persona_schema = PersonaSerializer().dump(persona, many=True)
-    return jsonify(persona_schema)
+    return jsonify(dict(
+        pagina = pag,
+        cantidad = can,
+        resultado = persona_schema,
+        )
+    )
+   
 
 
 @app.route('/provincias')
@@ -288,10 +322,50 @@ def tipoDni():
 
 
 @app.route('/usuarios')
-def usuario():
+def get_usuario():
     usuario = db.session.query(Usuario).all()
+    if len(usuario) == 0:
+        return jsonify(dict(Mensaje = "No existen Usuarios")), 400
     usuario_schema = UsuarioSerializer().dump(usuario, many=True)
-    return jsonify(usuario_schema)
+    return jsonify(dict(Usuarios = usuario_schema )), 200
+
+
+@app.route('/usuarios', methods=['POST'])
+def add_usuario():
+    if request.method == 'POST':
+        data = request.json
+        print('ENTRA AL PPOST')
+        nombre = data['nombre']
+        contrasenia = data['contrasenia'].encode('utf-8')
+        idTipousuario = data['idTipousuario']
+        # fechaCarga = data['fechaCarga']
+        idPersona = data['idPersona']
+
+        contra_hash = hashlib.md5(contrasenia).hexdigest()
+
+        try:
+            nuevo_usuario = Usuario(
+                nombre=nombre, 
+                contrasenia=contra_hash, 
+                idTipousuario=idTipousuario, 
+                fechaCarga=datetime.now(), 
+                idPersona=idPersona
+            )
+            db.session.add(nuevo_usuario)
+            db.session.commit()
+
+            resultado = UsuarioSerializer().dump(nuevo_usuario)
+
+            if resultado:
+                return jsonify(dict(NuevoUsuario=resultado))
+
+        except:
+            return jsonify(dict(Error = 'No es posible generar el usuario')), 201
+            
+        
+
+   
+
 
 
 @app.route('/tipos_usuario')
