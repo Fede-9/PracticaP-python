@@ -1,0 +1,52 @@
+('/login')
+login():
+
+('/usuarios')
+get_usuarios():
+
+('/usuarios', methods=['POST'])
+add_usuarios():
+
+('/usuarios/<id>', methods=['DELETE'])
+delete_usuarios(id):
+
+('/usuarios/<id>', methods=['PUT'])
+update_usuarios(id):
+
+
+('/post')
+get_post():
+
+('/post', methods=['POST'])
+add_post():
+
+('/post/<id>', methods=['DELETE'])
+delete_post():
+
+('/post/<id>', methods=['PUT'])
+update_post():
+
+('/categoria')
+get_categoria():
+
+('/categoria', methods=['POST'])
+add_categoria():
+
+('/categoria/<id>', methods=['DELETE'])
+delete_categoria(id):
+
+('/categoria/<id>', methods=['PUT'])
+update_categoria(id):
+
+('/roles')
+get_rol():
+
+('/roles', methods=['POST'])
+add_rol():
+
+('/roles/<id>', methods=['DELETE'])
+delete_rol(id):
+
+('/roles/<id>', methods=['PUT'])
+update_rol(id):
+

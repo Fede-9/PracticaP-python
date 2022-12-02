@@ -1,13 +1,11 @@
-from enum import unique
-import json
+from functools import wraps
+from datetime import datetime, timedelta
 import hashlib
-from datetime import datetime
-from logging import exception
+# import jwt 
 
 
 
-# import bcrypt
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -24,8 +22,11 @@ app = Flask(__name__)
 
 
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://usuario:contrasenia@host/nombreDB'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://BD2021:BD2021itec@143.198.156.171/sql_cometto'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost:3307/modelado'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://BD2021:BD2021itec@143.198.156.171/sql_cometto'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS '] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost:3307/modelado'
+app.config['SECRET_KEY'] = "acapongoloquequiero"
+
 
 
 
@@ -135,7 +136,7 @@ class Persona(db.Model):
 
 
 
-# -------------------- Serializaciones ---------------
+# -------------------- Serializadores ---------------
 
 class PaisSerializer(ma.Schema):
     id = fields.Integer(dump_only=True)
@@ -269,37 +270,56 @@ def persona():
     )
    
 
-
-@app.route('/provincias')
-def get_provincias():
-    provincia = db.session.query(Provincia).all()
-    provincia_schema = ProvinciaSerializer().dump(provincia, many=True)
-    return jsonify(provincia_schema)
-
-@app.route('/provincias', methods=['POST'])
-def add_provincia():
-    if request.method == 'POST':
+@app.route('/personas', methods=['POST'])
+def add_personas():
+     if request.method == 'POST':
         data = request.json
         nombre = data['nombre']
+        idTipodni = data['idTipodni']
+        dni = data['dni']
+        direccion = data['direccion']
+        idLocalidad = data['idLocalidad']
         idPais = data['idPais']
-        try:
-            nueva_provincia = Provincia(idPais=idPais, nombre=nombre)
-            db.session.add(nueva_provincia)
+        fechaNacimiento = data['fechaNacimiento']
+        idSexo = data['idSexo']
+        telefono = data['telefono']
+        email = data['email']
+        activo = data['activo']
+        fechaCarga = data['fechaCarga']
+    
+        nueva_persona = Persona(
+                nombre = nombre,
+                idTipodni = idTipodni,
+                dni = dni,
+                 direccion = direccion,
+                idLocalidad = idLocalidad,
+                idPais = idPais,
+                fechaNacimiento = fechaNacimiento,
+                idSexo = idSexo,
+                telefono = telefono,
+                email = email,
+                activo = activo,
+                fechaCarga = fechaCarga
+                    
+                )
+        db.session.add(nueva_persona)
+        db.session.commit()
+        persona_schema = PersonaSerializer().dump(nueva_persona)
+        return jsonify(
+            {"Mensaje": "La persona se creo correctamente"},
+            {"Persona": persona_schema}
+        ), 201
+
+
+@app.route('/personas/<id>', methods=['DELETE'])
+def delete_persona(id):
+            persona = Persona.query.filter_by(id=id).first()
+            print(persona.id)
+            db.session.delete(persona)
             db.session.commit()
 
-            provincia_schema = ProvinciaSerializer().dump(nueva_provincia)
 
-            return jsonify(
-                {"Mensaje": "La provincia se creo correctamente"},
-                {"Pais": provincia_schema}
-            ), 201
 
-        except:
-            return jsonify(
-                {"Mensaje": "Algo salio mal, valide los datos"},
-            ), 404
-
-        
 @app.route('/localidades')
 def localidad():
     localidad = db.session.query(Localidad).all()
@@ -316,7 +336,7 @@ def sexo():
 
 @app.route('/tipos_dni')
 def tipoDni():
-    tipodni = db.session.query(TipoDni).all()
+    tipodni = db.session.query(Tipodni).all()
     tipodni_schema = TipoDniSerializer().dump(tipodni, many=True)
     return jsonify(tipodni_schema)
 
@@ -362,10 +382,98 @@ def add_usuario():
         except:
             return jsonify(dict(Error = 'No es posible generar el usuario')), 201
             
-        
 
+
+# @app.route('/login', methods=['GET'])
+# def login():
+#     auth = request.authorization
+#     username = auth['username']
+#     password = auth['password'].encode('utf-8')
+
+
+
+#     if not auth or not auth.username or not auth.password:
+#         return jsonify({"Error":"No se enviaron todos los parametros auth"}, 401)
+
+#     hasheada = hashlib.md5(password).hexdigest()
+
+#     user_login = db.session.query(Usuario).filter_by(nombre=username).filter_by(contrasenia=hasheada).first()
+    
+
+#     if user_login:
+#         token = jwt.encode(
+#             {
+#                 "usuario": username, 
+#                 "id_usuario": user_login.id,
+#                 "exp": datetime.utcnow() + timedelta(minutes=5)
+#             },
+#             app.secret_key
+#         )
+#         session['api_session_token'] = token
    
+#         return jsonify({"Token": token.decode("UTF-8")})
+    
+#     return jsonify({"Error":"Algun dato no coincide"}, 401)
 
+
+# # ------- TOKEN ------
+# def token_required(f):
+#     @wraps(f)
+#     def decorated(*args, **kwargs):
+#         token = None
+#         if 'x-access-token' in request.headers:
+#             token = request.headers['x-access-token']
+
+#         if not token:
+#             return jsonify({"ERROR":"Token is missing"}),401
+
+#         try: 
+#             datatoken = jwt.decode(token, app.secret_key)
+#             print(datatoken)
+#             userLogged = Usuario.query.filter_by(id=datatoken['id_usuario']).first()
+#         except:
+#             return jsonify(
+#                 {"ERROR": "Token is invalid or expired"}
+#             ),401
+
+#         return f(userLogged, *args, **kwargs)
+
+#     return decorated
+
+
+# @app.route('/provincias')
+# @token_required
+# def get_provincias(userLogged):
+#     if userLogged.idTipousuario == 2:
+#         provincia = db.session.query(Provincia).all()
+#         provincia_schema = ProvinciaSerializer().dump(provincia, many=True)
+#         return jsonify(provincia_schema)
+#     else:
+#         return jsonify({"Error":"Usted no tiene permiso!!"})
+
+
+@app.route('/provincias', methods=['POST'])
+def add_provincia():
+    if request.method == 'POST':
+        data = request.json
+        nombre = data['nombre']
+        idPais = data['idPais']
+        try:
+            nueva_provincia = Provincia(idPais=idPais, nombre=nombre)
+            db.session.add(nueva_provincia)
+            db.session.commit()
+
+            provincia_schema = ProvinciaSerializer().dump(nueva_provincia)
+
+            return jsonify(
+                {"Mensaje": "La provincia se creo correctamente"},
+                {"Pais": provincia_schema}
+            ), 201
+
+        except:
+            return jsonify(
+                {"Mensaje": "Algo salio mal, valide los datos"},
+            ), 404
 
 
 @app.route('/tipos_usuario')

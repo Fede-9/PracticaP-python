@@ -26,3 +26,12 @@ Flask run --reload
 
 ---- PARA LOS REQUERIMIENTOS ----
 pip install -r requirements.txt
+
+
+
+
+------- para no traer el id por ejemplo en este caso de pais ----
+pais = fields.Nested(PaisSerializer, exclude=['id',])
+
+
+---- con Faker rellenamos nuestra base de datos con datos falsos ---------

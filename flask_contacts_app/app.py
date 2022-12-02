@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # esto se necesita para los mensajes flash es necesario tenerla
 app.config['SECRET_KEY'] = 'clave_secretaa'
-
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost:3307/flask_contacts'
 
 db = SQLAlchemy(app)
